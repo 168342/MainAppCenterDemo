@@ -13,9 +13,9 @@ import AppCenterCrashes
 import AppCenterDistribute
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate,MSDistributeDelegate{
 
-
+var window: UIWindow? 
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -23,10 +23,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           MSCrashes.self
         ])
         MSAppCenter.start("81676a51-ff9c-42b6-b40b-2c8251a2a137", withServices: [MSDistribute.self])
+        MSDistribute.setEnabled(true)
         MSDistribute.checkForUpdate()
-
+        MSDistribute.setDelegate(self);
+        MSDistribute.notify(MSUpdateAction.update);
+        MSDistribute.notify(MSUpdateAction.postpone);
 
         return true
+    }
+    func distribute(_ distribute: MSDistribute!, releaseAvailableWith details: MSReleaseDetails!) -> Bool {
+
+      // Your code to present your UI to the user, e.g. an UIAlertController.
+      let alertController = UIAlertController(title: "Update available.",
+                                            message: "Do you want to update?",
+                                     preferredStyle:.alert)
+
+      alertController.addAction(UIAlertAction(title: "Update", style: .cancel) {_ in
+        MSDistribute.notify(.update)
+      })
+
+      alertController.addAction(UIAlertAction(title: "Postpone", style: .default) {_ in
+        MSDistribute.notify(.postpone)
+      })
+
+      // Show the alert controller.
+        self.window?.rootViewController?.present(alertController, animated: true)
+      return true;
     }
     // MARK: UISceneSession Lifecycle
 
